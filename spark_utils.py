@@ -1,5 +1,6 @@
 import logging
 from pyspark.sql import SparkSession
+import pandas as pd
 
 class SparkUtils:
     def __init__(self, app_name="SparkApp", master="local[*]"):
@@ -9,14 +10,12 @@ class SparkUtils:
         :param app_name: Name of the Spark application (default is 'SparkApp')
         :param master: The master URL for the Spark cluster (default is 'local[*]')
         """
-        
+
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(app_name)
-        
+
         self.spark_session = (
-            SparkSession.builder.master(master)
-            .appName(app_name)
-            .getOrCreate()
+            SparkSession.builder.master(master).appName(app_name).getOrCreate()
         )
         logging.info("Spark session initialized successfully.")
 
@@ -42,7 +41,6 @@ class SparkUtils:
         except Exception as e:
             logging.error(f"Error reading CSV file {file_path}: {e}")
 
-
     def write_csv(self, df, output_path, delimiter=",", mode="overwrite", header=True):
         """
         Writes a DataFrame to a CSV file with the specified delimiter.
@@ -54,14 +52,13 @@ class SparkUtils:
         :param header: Whether to include a header row in the output CSV (default is True)
         """
         try:
-            df.write.option("header", header) \
-                   .option("delimiter", delimiter) \
-                   .mode(mode) \
-                   .csv(output_path)
+            # df.repartition(1).write.option("header", header).option("delimiter", delimiter).mode(mode).csv(output_path)
+            collected_data = df.collect()
+            pdf = pd.DataFrame(collected_data, columns=df.columns)
+            pdf.to_csv(output_path, sep=delimiter, index=False, header=header)
             logging.info(f"DataFrame written to {output_path} successfully.")
         except Exception as e:
             logging.error(f"Error writing DataFrame to {output_path}: {e}")
-           
 
     def get_spark_session(self):
         """
@@ -79,12 +76,3 @@ class SparkUtils:
         logging.info("Spark session stopped.")
 
 
-if __name__ == "__main__":
-
-    spark_utils = SparkUtils(app_name="MySparkApp")
-
-
-    # df = spark_utils.read_csv("data/CurrencyExchange.csv", delimiter=",")
-    # df.show()
-
-    spark_utils.stop_spark_session()
