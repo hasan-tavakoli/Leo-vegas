@@ -78,12 +78,13 @@ class SparkUtils:
         self.spark_session.stop()
         logging.info("Spark session stopped.")
 
+
 if __name__ == "__main__":
 
     spark_utils = SparkUtils(app_name="MySparkApp")
 
 
-    df = spark_utils.read_csv("data/CurrencyExchange.csv", delimiter=",")
-    df.show()
+    # df = spark_utils.read_csv("data/CurrencyExchange.csv", delimiter=",")
+    # df.show()
 
     spark_utils.stop_spark_session()
