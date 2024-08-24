@@ -2,6 +2,7 @@ import logging
 from pyspark.sql import SparkSession
 import pandas as pd
 
+
 class SparkUtils:
     def __init__(self, app_name="SparkApp", master="local[*]"):
         """
@@ -74,5 +75,3 @@ class SparkUtils:
         """
         self.spark_session.stop()
         logging.info("Spark session stopped.")
-
-

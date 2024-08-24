@@ -45,3 +45,21 @@ class DataProvider:
         """
         output_path = "output/Dim_game.csv"
         self.spark_utils.write_csv(df, output_path)
+
+    def extract_player_data(self) -> DataFrame:
+        """
+        Extracts the Player data from the Player.csv file.
+
+        :return: DataFrame containing the Player data
+        """
+        file_path = "data/Player.csv"
+        return self.spark_utils.read_csv(file_path, delimiter=",")
+
+    def load_dim_player_data(self, df: DataFrame):
+        """
+        Saves the DimGame data to a CSV file.
+
+        :param df: DataFrame containing the DimGame data
+        """
+        output_path = "output/Dim_player.csv"
+        self.spark_utils.write_csv(df, output_path)
