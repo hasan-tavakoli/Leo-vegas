@@ -5,6 +5,7 @@ from spark_utils import SparkUtils
 from data_provider import DataProvider
 from game_dimension import DimGame
 from player_dimension import PlayerGame
+from fact_bet import FactBet
 
 
 class AnalyticsPipeline:
@@ -24,10 +25,11 @@ class AnalyticsPipeline:
         )
         self.dim_game = DimGame(self.data_provider)
         self.dim_player = PlayerGame(self.data_provider)
+        self.fact_bet = FactBet(self.data_provider)
 
     def run(self):
 
-        # self.dim_game.run()
+        self.dim_game.run()
         self.dim_player.run()
 
 

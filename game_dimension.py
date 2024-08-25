@@ -8,15 +8,15 @@ class DimGame:
         self.data_provider = data_provider
 
     def run(self):
-        game_df = self.data_provider.extract_game_data()
-        game_category_df = self.data_provider.extract_game_category_data()
-        game_provider_df = self.data_provider.extract_game_provider_data()
+        game_df = self.data_provider.extract_data("Game")
+        game_category_df = self.data_provider.extract_data("GameCategory")
+        game_provider_df = self.data_provider.extract_data("GameProvider")
 
         transformed_df = self._transform_data(
             game_df, game_category_df, game_provider_df
         )
 
-        self.data_provider.load_dim_game_data(transformed_df)
+        self.data_provider.load_data(transformed_df, "Dim_game")
 
     def _transform_data(
         self,

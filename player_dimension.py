@@ -11,11 +11,11 @@ class PlayerGame:
 
     def run(self):
 
-        player_df = self.data_provider.extract_player_data()
+        player_df = self.data_provider.extract_data("Player")
 
         transformed_df = self._transform_data(player_df)
 
-        self.data_provider.load_dim_player_data(transformed_df)
+        self.data_provider.load_data(transformed_df, "Dim_player")
 
     def _transform_data(
         self,
