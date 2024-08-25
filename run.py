@@ -31,6 +31,7 @@ class AnalyticsPipeline:
 
         self.dim_game.run()
         self.dim_player.run()
+        self.fact_bet.run()
 
 
 if __name__ == "__main__":
