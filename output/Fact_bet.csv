@@ -1,4 +1,4 @@
-date,PlayerId,country,gameID,Cash_turnover,Bonus_turnover,Cash_winnings,Bonus_winnings,Turnover,Winnings,Cash_result,Bonus_result,Gross_result
+date,player_id,country,game_id,Cash turnover,Bonus turnover,Cash winnings,Bonus winnings,Turnover,Winnings,Cash result,Bonus result,Gross result
 2017-03-20,1,AT,524,5.8133389705105,0.0,1.056970721911,0.0,5.8133389705105,1.056970721911,4.7563682485995,0.0,4.7563682485995
 2017-03-20,1,AT,2466,1.056970721911,0.0,0.0,0.0,1.056970721911,0.0,1.056970721911,0.0,1.056970721911
 2017-03-20,2,SE,524,6.341824331466,0.0,0.5284853609555,0.0,6.341824331466,0.5284853609555,5.8133389705105,0.0,5.8133389705105

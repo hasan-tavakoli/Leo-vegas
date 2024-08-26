@@ -31,7 +31,7 @@ class FactBet:
             raise ValueError(
                 "Player data is not cached. Please ensure PlayerGame.run() is called first."
             )
-        
+
         broadcast_player_df = broadcast(self.player_df)
 
         transformed_df = self._transform_data(
@@ -152,18 +152,21 @@ class FactBet:
 
         final_df = (
             game_transaction_player_country_df.groupBy(
-                col("date"), col("PlayerId"), col("country"), col("gameID")
+                col("date"),
+                col("PlayerId").alias("player_id"),
+                col("country"),
+                col("gameID").alias("game_id"),
             )
             .agg(
-                sum("Cash_turnover").alias("Cash_turnover"),
-                sum("Bonus_turnover").alias("Bonus_turnover"),
-                sum("Cash_winnings").alias("Cash_winnings"),
-                sum("Bonus_winnings").alias("Bonus_winnings"),
+                sum("Cash_turnover").alias("Cash turnover"),
+                sum("Bonus_turnover").alias("Bonus turnover"),
+                sum("Cash_winnings").alias("Cash winnings"),
+                sum("Bonus_winnings").alias("Bonus winnings"),
                 sum("Turnover").alias("Turnover"),
                 sum("Winnings").alias("Winnings"),
-                sum("Cash_result").alias("Cash_result"),
-                sum("Bonus_result").alias("Bonus_result"),
-                sum("Gross_result").alias("Gross_result"),
+                sum("Cash_result").alias("Cash result"),
+                sum("Bonus_result").alias("Bonus result"),
+                sum("Gross_result").alias("Gross result"),
             )
             .orderBy(col("date"), col("PlayerId"), col("country"), col("gameID"))
         )

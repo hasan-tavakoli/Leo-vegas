@@ -11,3 +11,8 @@ class CachedData:
         if self._cached_player_df is None:
             self._cached_player_df = self.data_provider.extract_data("Player").cache()
         return self._cached_player_df
+
+    def clear_cache(self):
+        if self._cached_player_df:
+            self._cached_player_df.unpersist()
+            self._cached_player_df = None

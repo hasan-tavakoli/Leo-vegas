@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from spark_utils import SparkUtils
 from data_provider import DataProvider
@@ -31,9 +32,14 @@ class AnalyticsPipeline:
 
     def run(self):
 
-        self.dim_game.run()
-        self.dim_player.run()
-        self.fact_bet.run()
+        try:
+            self.dim_game.run()
+            self.dim_player.run()
+            self.fact_bet.run()
+            self.cache_data.clear_cache()
+            self.spark_utils.stop_spark_session()
+        except Exception as e:
+            logging.error(f"Error in pipeline execution: {e}")
 
 
 if __name__ == "__main__":
