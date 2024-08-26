@@ -1,13 +1,24 @@
 from data_provider import DataProvider
+from datetime import datetime
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, when, first, sum
+from cached_data import CachedData
+from pyspark.sql.functions import col, when, first, sum, broadcast
 from pyspark.sql.window import Window
 
 
 class FactBet:
-    def __init__(self, data_provider: DataProvider):
+    def __init__(
+        self,
+        data_provider: DataProvider,
+        cache_data: CachedData,
+        start_date: datetime,
+        end_date: datetime,
+    ):
 
         self.data_provider = data_provider
+        self.player_df = cache_data.get_player_df()
+        self.start_date = start_date
+        self.end_date = end_date
 
     def run(self):
 
@@ -15,10 +26,16 @@ class FactBet:
             file_name="GameTransaction", delimiter=";"
         )
         currency_exchange_df = self.data_provider.extract_data("CurrencyExchange")
-        player_df = self.data_provider.extract_data("Player")
+        broadcast_currency_exchange_df = broadcast(currency_exchange_df)
+        if self.player_df is None:
+            raise ValueError(
+                "Player data is not cached. Please ensure PlayerGame.run() is called first."
+            )
+        
+        broadcast_player_df = broadcast(self.player_df)
 
         transformed_df = self._transform_data(
-            transaction_df, currency_exchange_df, player_df
+            transaction_df, broadcast_currency_exchange_df, broadcast_player_df
         )
         self.data_provider.load_data(transformed_df, "Fact_bet")
 
@@ -36,6 +53,10 @@ class FactBet:
         :param player_df: DataFrame containing player data
         :return: Transformed DataFrame for FactBet
         """
+
+        transaction_df = transaction_df.filter(
+            (col("date") > self.start_date) & (col("date") <= self.end_date)
+        )
 
         game_transaction_currency_df = (
             transaction_df.alias("t")
@@ -79,7 +100,7 @@ class FactBet:
             col("p.latestUpdate").desc()
         )
         player_df = player_df.alias("p")
-        palyer_df = (
+        player_df = (
             transaction_df.alias("t")
             .join(
                 player_df,
@@ -95,7 +116,7 @@ class FactBet:
         game_transaction_player_country_df = (
             game_transaction_currency_df.alias("gtc")
             .join(
-                palyer_df.alias("p"),
+                player_df.alias("p"),
                 (col("gtc.date") == col("p.date"))
                 & (col("gtc.PlayerId") == col("p.PlayerId"))
                 & (col("gtc.gameID") == col("p.gameID")),

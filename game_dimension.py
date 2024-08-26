@@ -49,22 +49,23 @@ class DimGame:
         ).withColumnRenamed("Game Provider Name", "Provider_name")
 
         dim_game_df = (
-        game_df.alias("game_df").join(
-            game_category_df.alias("game_category_df"),
-            col("game_df.game_id") == col("game_category_df.game_id"),
-            how="left"
+            game_df.alias("game_df")
+            .join(
+                game_category_df.alias("game_category_df"),
+                col("game_df.game_id") == col("game_category_df.game_id"),
+                how="left",
+            )
+            .join(
+                game_provider_df.alias("game_provider_df"),
+                col("game_df.provider_id") == col("game_provider_df.provider_id"),
+                how="left",
+            )
+            .select(
+                col("game_df.game_id"),
+                col("game_df.game_name"),
+                col("game_category_df.game_category"),
+                col("game_provider_df.Provider_name"),
+            )
         )
-        .join(
-            game_provider_df.alias("game_provider_df"),
-            col("game_df.provider_id") == col("game_provider_df.provider_id"),
-            how="left"
-        )
-        .select(
-            col("game_df.game_id"),
-            col("game_df.game_name"),
-            col("game_category_df.game_category"),
-            col("game_provider_df.Provider_name")
-        )
-    )
 
         return dim_game_df

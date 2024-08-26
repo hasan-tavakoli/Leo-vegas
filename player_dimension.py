@@ -1,19 +1,24 @@
 from data_provider import DataProvider
 from pyspark.sql import DataFrame
 from pyspark.sql.window import Window
+from cached_data import CachedData
 from pyspark.sql.functions import row_number, col
 
 
 class PlayerGame:
-    def __init__(self, data_provider: DataProvider):
+    def __init__(self, data_provider: DataProvider, cache_data: CachedData):
 
         self.data_provider = data_provider
+        self.player_df = cache_data.get_player_df()
 
     def run(self):
 
-        player_df = self.data_provider.extract_data("Player")
+        if self.player_df is None:
+            raise ValueError(
+                "Player data is not cached. Please ensure PlayerGame.run() is called first."
+            )
 
-        transformed_df = self._transform_data(player_df)
+        transformed_df = self._transform_data(self.player_df)
 
         self.data_provider.load_data(transformed_df, "Dim_player")
 
