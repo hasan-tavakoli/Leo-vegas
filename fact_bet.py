@@ -2,7 +2,7 @@ from data_provider import DataProvider
 from datetime import datetime
 from pyspark.sql import DataFrame
 from cached_data import CachedData
-from pyspark.sql.functions import col, when, first, sum, broadcast, udf
+from pyspark.sql.functions import col, when, first, sum, broadcast, udf, coalesce, lit
 from pyspark.sql.window import Window
 from pyspark.sql.types import FloatType
 
@@ -71,13 +71,15 @@ class FactBet:
         """
 
         convert_to_float_udf = udf(_convert_to_float, FloatType())
-
-        transaction_df = transaction_df.withColumn(
-            "realAmount", convert_to_float_udf(col("realAmount"))
-        ).withColumn("bonusAmount", convert_to_float_udf(col("bonusAmount")))
-
+        
         transaction_df = transaction_df.filter(
             (col("date") > self.start_date) & (col("date") <= self.end_date)
+        )
+
+        transaction_df = transaction_df.withColumn(
+            "realAmount", coalesce(convert_to_float_udf(col("realAmount")), lit(0.0))
+        ).withColumn(
+            "bonusAmount", coalesce(convert_to_float_udf(col("bonusAmount")), lit(0.0))
         )
 
         game_transaction_currency_df = (
@@ -94,7 +96,7 @@ class FactBet:
                 col("t.gameID"),
                 when(
                     col("t.txType") == "WAGER",
-                    col("t.realAmount") ,
+                    col("t.realAmount"),
                 )
                 .otherwise(0)
                 .alias("Cash_turnover"),
@@ -172,25 +174,21 @@ class FactBet:
             )
         )
 
-        final_df = (
-            game_transaction_player_country_df.groupBy(
-                col("date"),
-                col("PlayerId").alias("player_id"),
-                col("country"),
-                col("gameID").alias("game_id"),
-            )
-            .agg(
-                sum("Cash_turnover").alias("Cash turnover"),
-                sum("Bonus_turnover").alias("Bonus turnover"),
-                sum("Cash_winnings").alias("Cash winnings"),
-                sum("Bonus_winnings").alias("Bonus winnings"),
-                sum("Turnover").alias("Turnover"),
-                sum("Winnings").alias("Winnings"),
-                sum("Cash_result").alias("Cash result"),
-                sum("Bonus_result").alias("Bonus result"),
-                sum("Gross_result").alias("Gross result"),
-            )
-            
+        final_df = game_transaction_player_country_df.groupBy(
+            col("date"),
+            col("PlayerId").alias("player_id"),
+            col("country"),
+            col("gameID").alias("game_id"),
+        ).agg(
+            sum("Cash_turnover").alias("Cash turnover"),
+            sum("Bonus_turnover").alias("Bonus turnover"),
+            sum("Cash_winnings").alias("Cash winnings"),
+            sum("Bonus_winnings").alias("Bonus winnings"),
+            sum("Turnover").alias("Turnover"),
+            sum("Winnings").alias("Winnings"),
+            sum("Cash_result").alias("Cash result"),
+            sum("Bonus_result").alias("Bonus result"),
+            sum("Gross_result").alias("Gross result"),
         )
 
         return final_df
