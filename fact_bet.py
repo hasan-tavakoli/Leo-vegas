@@ -2,8 +2,24 @@ from data_provider import DataProvider
 from datetime import datetime
 from pyspark.sql import DataFrame
 from cached_data import CachedData
-from pyspark.sql.functions import col, when, first, sum, broadcast
+from pyspark.sql.functions import col, when, first, sum, broadcast, udf
 from pyspark.sql.window import Window
+from pyspark.sql.types import FloatType
+
+
+def _convert_to_float(value: str) -> float:
+    """
+    Convert a string with comma as decimal separator to a float.
+
+    :param value: The string value to convert.
+    :return: The converted float value.
+    """
+    try:
+        if value:
+            return float(value.replace(",", "."))
+        return None
+    except ValueError:
+        return None
 
 
 class FactBet:
@@ -54,6 +70,12 @@ class FactBet:
         :return: Transformed DataFrame for FactBet
         """
 
+        convert_to_float_udf = udf(_convert_to_float, FloatType())
+
+        transaction_df = transaction_df.withColumn(
+            "realAmount", convert_to_float_udf(col("realAmount"))
+        ).withColumn("bonusAmount", convert_to_float_udf(col("bonusAmount")))
+
         transaction_df = transaction_df.filter(
             (col("date") > self.start_date) & (col("date") <= self.end_date)
         )
@@ -64,7 +86,7 @@ class FactBet:
                 currency_exchange_df.alias("c"),
                 (col("t.txCurrency") == col("c.currency"))
                 & (col("t.date") == col("c.Date")),
-                how="inner",
+                how="left",
             )
             .select(
                 col("t.date"),
