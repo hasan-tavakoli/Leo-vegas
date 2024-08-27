@@ -37,7 +37,7 @@ class AnalyticsPipeline:
             self.dim_player.run()
             self.fact_bet.run()
             self.cache_data.clear_cache()
-            # self.spark_utils.stop_spark_session()
+            self.spark_utils.stop_spark_session()
         except Exception as e:
             logging.error(f"Error in pipeline execution: {e}")
 
