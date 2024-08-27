@@ -94,7 +94,7 @@ class FactBet:
                 col("t.gameID"),
                 when(
                     col("t.txType") == "WAGER",
-                    col("t.realAmount") * col("c.baseRateEuro"),
+                    col("t.realAmount") ,
                 )
                 .otherwise(0)
                 .alias("Cash_turnover"),
@@ -190,7 +190,7 @@ class FactBet:
                 sum("Bonus_result").alias("Bonus result"),
                 sum("Gross_result").alias("Gross result"),
             )
-            .orderBy(col("date"), col("PlayerId"), col("country"), col("gameID"))
+            
         )
 
         return final_df
